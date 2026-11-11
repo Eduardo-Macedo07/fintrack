@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/features/auth/components/logout-button";
 import { useTransactionDialog } from "@/features/transactions/components/transaction-dialog";
@@ -64,7 +65,7 @@ export function TopBar({ userName }: { userName: string }) {
           </nav>
         </LayoutGroup>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button
             onClick={() => openNew()}
             className="hidden rounded-full sm:inline-flex"
@@ -74,6 +75,7 @@ export function TopBar({ userName }: { userName: string }) {
           <span className="hidden max-w-32 truncate text-sm text-muted-foreground md:inline">
             {userName}
           </span>
+          <ThemeToggle />
           <LogoutButton />
         </div>
       </div>

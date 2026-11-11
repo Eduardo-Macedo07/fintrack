@@ -27,6 +27,7 @@ Plataforma web de **controle financeiro pessoal**: receitas, despesas, cartões 
 - [x] **Transações**: criar, editar, excluir e filtrar movimentações (tipo, categoria, busca e mês)
 - [ ] **Cartões de crédito**: limites, compras parceladas e faturas mensais
 - [ ] **Categorias**: padrão (feito) e personalizadas (próximas etapas)
+- [x] **Tema claro e escuro**: botão no cabeçalho, transição suave e escolha lembrada (segue o sistema se você não escolher)
 - [x] **Planejar**: orçamento por semana, simulador de quanto o dinheiro acumula e conteúdo educativo sobre investimentos
 - [ ] **Metas financeiras**: objetivos de economia e progresso
 - [ ] **Relatórios**: comparação entre meses, gráficos e exportação CSV
