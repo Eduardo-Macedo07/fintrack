@@ -67,6 +67,25 @@ Página/Action privada ──► requireUser() ──► confere o usuário NO B
 - Exclusão: conta com transações **não pode** ser apagada (`Restrict`; usa-se `archivedAt`). Categoria apagada deixa a transação sem categoria (`SetNull`).
 - Testes de integração rodam contra um banco separado (`fintrack_test`) com as migrações reais, em um arquivo por vez.
 
+## Transações, datas e saldo
+
+- **Data de transação é data de calendário**, guardada à meia-noite UTC (`src/lib/dates.ts`). Assim, "31/10" nunca vira "01/11" por causa de fuso. O fuso (`America/Sao_Paulo`) só é usado para saber "que dia/mês é hoje".
+- **Mês é um intervalo `[início, fim)`**: o dia 1º do mês seguinte fica de fora. Coberto por testes de fronteira (31/10, 01/11, 30/11, 01/12).
+- **"Sobram" no painel** = receitas do mês − despesas do mês. **Saldo total** = saldo inicial das contas + tudo que entrou − tudo que saiu **até o fim do mês exibido**, então navegar para meses antigos mostra o saldo da época.
+- **Contas financeiras ficam ocultas na interface.** Toda transação usa a primeira conta ativa do usuário. A estrutura existe no banco para evoluir (várias contas, cartões) sem migração dolorosa.
+- **Isolamento por usuário:** todo serviço recebe o `userId` da sessão. Editar ou apagar a transação de outra pessoa responde "não encontrada", igual a um id inexistente. Categoria de outro usuário (ou de tipo diferente) é recusada. Tudo isso tem teste de integração.
+
+## Interface e movimento
+
+Direção: simples, bonita e animada, para responder rápido "como está meu mês?" e registrar um gasto em segundos.
+
+- **Uma coluna, sem cartões iguais.** O destaque é o painel do mês (`MonthHero`): a pergunta "quanto ainda posso gastar?" com uma barra do quanto do que entrou já foi gasto.
+- **Movimento tem função:** uma sequência ao abrir o painel (valor contando, barra enchendo); depois, só movimento que responde a uma ação (trocar de mês, abrir o formulário, adicionar/remover item). `prefers-reduced-motion` é respeitado.
+- **Celular em primeiro lugar:** barra de abas com botão "+" ao alcance do polegar; o formulário é uma folha que sobe da base.
+- **Valor digitado estilo caixa registradora** (digita-se só números; os centavos se ajustam).
+- **Fontes:** Bricolage Grotesque (títulos e valores) e Geist (texto). **Cores:** azul-ultramar da marca; verde e vermelho **escurecidos** para passar contraste AA em texto pequeno.
+- **Armadilha evitada:** controles com `layoutId` (pílula deslizante) tremiam quando o diálogo se recentralizava. A pílula do `Segmented` é posicionada pelo índice da opção, não medida na tela.
+
 ## Limitações conhecidas (a tratar nas próximas etapas)
 
 - **Sem limite de tentativas de login** (rate limiting). Necessário antes de uso real.

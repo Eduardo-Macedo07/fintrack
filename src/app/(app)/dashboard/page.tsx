@@ -1,22 +1,89 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
+import { CategoryBars } from "@/features/dashboard/components/category-bars";
+import { cumulativeByDay } from "@/features/dashboard/cumulative";
+import { MonthHero } from "@/features/dashboard/components/month-hero";
+import { PaceChart } from "@/features/dashboard/components/pace-chart";
+import { TransactionList } from "@/features/transactions/components/transaction-list";
+import {
+  getDailyFlow,
+  getMonthSummary,
+  listTransactions,
+} from "@/features/transactions/server/service";
+import { currentMonth, isMonthKey, today } from "@/lib/dates";
+import { prisma } from "@/server/db";
 import { requireUser } from "@/server/session";
 
-export const metadata: Metadata = { title: "Dashboard" };
+export const metadata: Metadata = { title: "Início" };
 
-export default async function DashboardPage() {
-  // Cada página privada verifica a sessão por conta própria: layouts não
-  // são re-renderizados a cada navegação, então não bastam como proteção.
+export default async function DashboardPage({ searchParams }: PageProps<"/dashboard">) {
+  // Cada página privada confirma a sessão: layouts não bastam como proteção.
   const user = await requireUser();
 
+  const { month: raw } = await searchParams;
+  const month = typeof raw === "string" && isMonthKey(raw) ? raw : currentMonth();
+
+  const [summary, daily, transactions] = await Promise.all([
+    getMonthSummary(prisma, user.id, month),
+    getDailyFlow(prisma, user.id, month),
+    listTransactions(prisma, user.id, { month }),
+  ]);
+
+  const todayDay = month === currentMonth() ? Number(today().slice(8, 10)) : null;
+
   return (
-    <section className="grid gap-2">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        Olá, {user.name.split(" ")[0]}!
-      </h1>
-      <p className="text-muted-foreground">
-        Seu dashboard financeiro chega na próxima etapa.
-      </p>
-    </section>
+    <div className="grid gap-12">
+      <MonthHero
+        month={month}
+        income={summary.income}
+        expense={summary.expense}
+        balance={summary.balance}
+      />
+
+      <section aria-labelledby="categories-title">
+        <h2
+          id="categories-title"
+          className="font-display mb-5 text-xl font-semibold tracking-tight"
+        >
+          Para onde foi o dinheiro
+        </h2>
+        <CategoryBars rows={summary.expensesByCategory} />
+      </section>
+
+      <section aria-labelledby="pace-title">
+        <h2 id="pace-title" className="font-display text-xl font-semibold tracking-tight">
+          Ritmo do mês
+        </h2>
+        <p className="mt-1 mb-5 text-sm text-muted-foreground">
+          Quando a área vermelha passa da linha verde, você gastou mais do que entrou.
+        </p>
+        <PaceChart points={cumulativeByDay(month, daily)} todayDay={todayDay} />
+      </section>
+
+      <section aria-labelledby="recent-title">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2
+            id="recent-title"
+            className="font-display text-xl font-semibold tracking-tight"
+          >
+            Últimas transações
+          </h2>
+          {transactions.length > 5 && (
+            <Link
+              href={`/transactions?month=${month}`}
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Ver todas
+            </Link>
+          )}
+        </div>
+        <TransactionList
+          transactions={transactions.slice(0, 5)}
+          emptyTitle="Nenhuma transação neste mês"
+          emptyHint="Registre sua primeira despesa ou receita e o painel ganha vida."
+        />
+      </section>
+    </div>
   );
 }

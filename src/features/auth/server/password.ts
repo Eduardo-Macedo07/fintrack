@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 
-const COST = 12;
+// Custo 12 em produção. Nos testes, 4 (o mínimo) para a suíte não gastar segundos em hash.
+const COST = process.env.NODE_ENV === "test" ? 4 : 12;
 
 export function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, COST);
