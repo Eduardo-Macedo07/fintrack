@@ -8,6 +8,24 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fintrack
+          POSTGRES_PASSWORD: fintrack
+          POSTGRES_DB: fintrack_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fintrack"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      # Valores só para o CI (banco descartável). Não são segredos.
+      DATABASE_URL: postgresql://fintrack:fintrack@localhost:5432/fintrack_test
+      AUTH_SECRET: ci-only-secret-with-at-least-32-characters
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,3 +37,4 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - run: npm run build

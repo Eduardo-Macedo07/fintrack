@@ -1,0 +1,91 @@
+// Modelo de dados do FinTrack.
+// Convenções:
+//  - Valores monetários são inteiros em centavos (Int). Ver src/lib/money.ts.
+//  - Toda tabela de dados do usuário tem `userId` e TODA consulta filtra por ele.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AccountType {
+  CHECKING // conta corrente
+  SAVINGS // poupança
+  WALLET // dinheiro em espécie
+  INVESTMENT // investimentos
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique // sempre salvo em minúsculas
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  accounts     Account[]
+  categories   Category[]
+  transactions Transaction[]
+}
+
+/// Conta financeira do usuário (corrente, carteira, poupança...).
+/// Não confundir com contas de login do Auth.js: usamos sessão JWT, sem tabela de Account do Auth.js.
+model Account {
+  id             String      @id @default(cuid())
+  userId         String
+  name           String
+  type           AccountType @default(CHECKING)
+  initialBalance Int         @default(0) // centavos
+  archivedAt     DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, name])
+}
+
+model Category {
+  id        String          @id @default(cuid())
+  userId    String
+  name      String
+  type      TransactionType
+  color     String          @default("#64748b")
+  createdAt DateTime        @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, type, name])
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  userId      String
+  accountId   String
+  categoryId  String?
+  type        TransactionType
+  amount      Int // centavos, sempre positivo; o sinal vem de `type`
+  description String
+  date        DateTime // data da movimentação (UTC)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account  Account   @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([accountId])
+  @@index([categoryId])
+}

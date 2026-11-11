@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
@@ -10,11 +12,16 @@ export default function Home() {
         Suas finanças, sob controle.
       </h1>
       <p className="max-w-xl text-lg text-muted-foreground">
-        Receitas, despesas, cartões, parcelas e metas em um só lugar. Em construção.
+        Receitas, despesas, cartões, parcelas e metas em um só lugar.
       </p>
-      <Button size="lg" disabled>
-        Entrar (em breve)
-      </Button>
+      <div className="flex gap-3">
+        <Button size="lg" asChild>
+          <Link href="/register">Criar conta</Link>
+        </Button>
+        <Button size="lg" variant="outline" asChild>
+          <Link href="/login">Entrar</Link>
+        </Button>
+      </div>
     </main>
   );
 }
