@@ -2,7 +2,7 @@
 
 Plataforma web de **controle financeiro pessoal**: receitas, despesas, cartões de crédito, parcelas e metas de economia. Projeto full-stack em TypeScript, construído do zero com foco em regras de negócio reais (parcelamento, fechamento de fatura, saldo correto) e em qualidade de engenharia (testes, CI, validação de entrada, autorização por usuário).
 
-> **Status:** em desenvolvimento. Etapas 1 (arquitetura) e 2 (banco de dados e autenticação) concluídas.
+> **Status:** em desenvolvimento. Etapas 1 (arquitetura), 2 (banco de dados e autenticação) e 3 (dashboard e transações) concluídas.
 
 ## Stack
 
@@ -23,10 +23,10 @@ Plataforma web de **controle financeiro pessoal**: receitas, despesas, cartões 
 ## Funcionalidades
 
 - [x] **Autenticação**: cadastro, login e isolamento dos dados por usuário
-- [ ] **Dashboard**: saldo total, receitas, despesas e gráficos
-- [ ] **Transações**: criar, editar, excluir e filtrar movimentações
+- [x] **Dashboard**: quanto sobra no mês, saldo total, gastos por categoria e ritmo do mês
+- [x] **Transações**: criar, editar, excluir e filtrar movimentações (tipo, categoria, busca e mês)
 - [ ] **Cartões de crédito**: limites, compras parceladas e faturas mensais
-- [ ] **Categorias**: padrão e personalizadas
+- [ ] **Categorias**: padrão (feito) e personalizadas (próximas etapas)
 - [ ] **Metas financeiras**: objetivos de economia e progresso
 - [ ] **Relatórios**: comparação entre meses, gráficos e exportação CSV
 
@@ -90,7 +90,7 @@ docs/             # Documentação do projeto
 
 1. ✅ Preparação e arquitetura
 2. ✅ Banco de dados e autenticação
-3. ⬜ Dashboard e CRUD de transações
+3. ✅ Dashboard e CRUD de transações
 4. ⬜ Regras financeiras (parcelas, faturas, recorrência)
 5. ⬜ Relatórios e qualidade
 6. ⬜ Deploy e portfólio

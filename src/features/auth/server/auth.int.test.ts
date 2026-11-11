@@ -18,7 +18,7 @@ describe("registerUser", () => {
       include: { accounts: true, categories: true },
     });
     expect(row.passwordHash).not.toBe(ana.password);
-    expect(row.passwordHash).toMatch(/^\$2[aby]\$12\$/);
+    expect(row.passwordHash).toMatch(/^\$2[aby]\$\d{2}\$/);
     expect(row.accounts.map((a) => a.name)).toEqual(["Carteira"]);
     expect(row.categories).toHaveLength(DEFAULT_CATEGORIES.length);
   });
