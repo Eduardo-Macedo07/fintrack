@@ -2,7 +2,7 @@
 
 Plataforma web de **controle financeiro pessoal**: receitas, despesas, cartões de crédito, parcelas e metas de economia. Projeto full-stack em TypeScript, construído do zero com foco em regras de negócio reais (parcelamento, fechamento de fatura, saldo correto) e em qualidade de engenharia (testes, CI, validação de entrada, autorização por usuário).
 
-> **Status:** em desenvolvimento. Etapas 1 (arquitetura), 2 (banco de dados e autenticação) e 3 (dashboard e transações) concluídas.
+> **Status:** em desenvolvimento. Etapas 1 (arquitetura), 2 (banco de dados e autenticação) e 3 (dashboard e transações) concluídas, mais a página Planejar.
 
 ## Stack
 
@@ -27,6 +27,7 @@ Plataforma web de **controle financeiro pessoal**: receitas, despesas, cartões 
 - [x] **Transações**: criar, editar, excluir e filtrar movimentações (tipo, categoria, busca e mês)
 - [ ] **Cartões de crédito**: limites, compras parceladas e faturas mensais
 - [ ] **Categorias**: padrão (feito) e personalizadas (próximas etapas)
+- [x] **Planejar**: orçamento por semana, simulador de quanto o dinheiro acumula e conteúdo educativo sobre investimentos
 - [ ] **Metas financeiras**: objetivos de economia e progresso
 - [ ] **Relatórios**: comparação entre meses, gráficos e exportação CSV
 

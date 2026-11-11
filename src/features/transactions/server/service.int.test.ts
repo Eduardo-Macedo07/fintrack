@@ -7,6 +7,7 @@ import {
   deleteTransaction,
   getDailyFlow,
   getMonthSummary,
+  getRecentAverages,
   InvalidCategoryError,
   listCategories,
   listTransactions,
@@ -353,5 +354,61 @@ describe("getDailyFlow", () => {
     expect(rows).toHaveLength(2);
     expect(rows).toContainEqual({ day: "2026-11-03", type: "EXPENSE", amount: 3000 });
     expect(rows).toContainEqual({ day: "2026-11-03", type: "INCOME", amount: 9000 });
+  });
+});
+
+describe("getRecentAverages", () => {
+  const tx = (userId: string, type: "INCOME" | "EXPENSE", amount: number, date: string) =>
+    createTransaction(prisma, userId, { type, amount, description: "x", date });
+
+  it("usa só meses completos anteriores, ignorando o mês atual", async () => {
+    await tx(ana.id, "INCOME", 500000, "2026-09-05");
+    await tx(ana.id, "EXPENSE", 200000, "2026-09-10");
+    await tx(ana.id, "INCOME", 500000, "2026-10-05");
+    await tx(ana.id, "EXPENSE", 400000, "2026-10-10");
+    await tx(ana.id, "EXPENSE", 999999, "2026-11-02"); // mês atual: fora da média
+
+    const avg = await getRecentAverages(prisma, ana.id, "2026-11");
+    expect(avg).toMatchObject({
+      months: 2,
+      income: 500000,
+      expense: 300000,
+      net: 200000,
+      partial: false,
+    });
+  });
+
+  it("não olha além de 3 meses para trás", async () => {
+    await tx(ana.id, "EXPENSE", 100000, "2026-06-15"); // 5 meses atrás: fora
+    await tx(ana.id, "EXPENSE", 300000, "2026-10-15");
+    const avg = await getRecentAverages(prisma, ana.id, "2026-11");
+    expect(avg.months).toBe(1);
+    expect(avg.expense).toBe(300000);
+  });
+
+  it("sem histórico completo, cai no mês atual e avisa que é parcial", async () => {
+    await tx(ana.id, "INCOME", 300000, "2026-11-03");
+    await tx(ana.id, "EXPENSE", 100000, "2026-11-04");
+    const avg = await getRecentAverages(prisma, ana.id, "2026-11");
+    expect(avg).toMatchObject({
+      months: 1,
+      income: 300000,
+      expense: 100000,
+      net: 200000,
+      partial: true,
+    });
+  });
+
+  it("usuário sem dados: zeros e parcial", async () => {
+    expect(await getRecentAverages(prisma, ana.id, "2026-11")).toMatchObject({
+      months: 0,
+      net: 0,
+      partial: true,
+    });
+  });
+
+  it("não mistura usuários", async () => {
+    await tx(beto.id, "EXPENSE", 777777, "2026-10-10");
+    expect((await getRecentAverages(prisma, ana.id, "2026-11")).months).toBe(0);
   });
 });

@@ -7,19 +7,23 @@ import { MonthSwitcher } from "@/components/month-switcher";
 import { formatBRL } from "@/lib/money";
 import { easeOut } from "@/lib/motion";
 
+import type { WeeklyBudget } from "../budget";
+
 type Props = {
   month: string;
   income: number;
   expense: number;
   /** Saldo acumulado até o fim do mês. */
   balance: number;
+  /** Só para o mês atual: quanto dá para gastar por semana até o fim dele. */
+  weekly?: WeeklyBudget | null;
 };
 
 /**
  * O destaque da tela: responde "quanto ainda posso gastar neste mês?".
  * Ao abrir, toca uma única sequência: rótulo → valor contando → barra enchendo → detalhes.
  */
-export function MonthHero({ month, income, expense, balance }: Props) {
+export function MonthHero({ month, income, expense, balance, weekly }: Props) {
   const reduce = useReducedMotion();
   const net = income - expense;
   const over = net < 0;
@@ -94,6 +98,27 @@ export function MonthHero({ month, income, expense, balance }: Props) {
           }}
         />
       </motion.div>
+
+      {weekly && (
+        <motion.div variants={item} className="mt-6 rounded-2xl bg-white/12 px-4 py-3.5">
+          {weekly.over ? (
+            <p className="text-sm">
+              Você já gastou tudo o que entrou: não há folga até o fim do mês.
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-hero-foreground/80">Dá para gastar por semana</p>
+              <div className="font-display tabular text-2xl font-semibold">
+                <AnimatedMoney cents={weekly.perWeek} duration={1.1} />
+              </div>
+              <p className="text-sm text-hero-foreground/75">
+                {formatBRL(weekly.perDay)} por dia, nos {weekly.daysLeft}{" "}
+                {weekly.daysLeft === 1 ? "dia que falta" : "dias que faltam"} do mês.
+              </p>
+            </>
+          )}
+        </motion.div>
+      )}
 
       <motion.dl variants={item} className="mt-7 grid grid-cols-3 gap-4 sm:max-w-md">
         <Stat label="Entrou" cents={income} />

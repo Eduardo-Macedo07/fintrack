@@ -1,8 +1,9 @@
-import { monthRange, formatDay } from "@/lib/dates";
+import { formatDay, monthRange, shiftMonth } from "@/lib/dates";
 import type { Prisma } from "@/generated/prisma/client";
 import type { Db } from "@/server/db";
 
 import type { DailyRow } from "@/features/dashboard/cumulative";
+import { monthlyAverages, type MonthlyAverages } from "@/features/planning/averages";
 
 import { balanceOf, totalsByType } from "../balance";
 import {
@@ -237,13 +238,13 @@ export async function getMonthSummary(
   };
 }
 
-/** Movimentação diária do mês (base do gráfico de ritmo). */
-export async function getDailyFlow(
+/** Movimentação diária num intervalo [start, end) (base dos gráficos e das médias). */
+async function dailyFlowBetween(
   db: Db,
   userId: string,
-  month: TransactionFilters["month"],
+  start: Date,
+  end: Date,
 ): Promise<DailyRow[]> {
-  const { start, end } = monthRange(month);
   const rows = await db.transaction.groupBy({
     by: ["date", "type"],
     where: { userId, date: { gte: start, lt: end } },
@@ -254,4 +255,35 @@ export async function getDailyFlow(
     type: r.type,
     amount: r._sum.amount ?? 0,
   }));
+}
+
+/** Movimentação diária do mês (base do gráfico de ritmo). */
+export async function getDailyFlow(
+  db: Db,
+  userId: string,
+  month: TransactionFilters["month"],
+): Promise<DailyRow[]> {
+  const { start, end } = monthRange(month);
+  return dailyFlowBetween(db, userId, start, end);
+}
+
+/**
+ * Média mensal dos últimos meses COMPLETOS antes de `month` (até `lookback` meses).
+ * Quem ainda não tem mês completo usa o mês atual até agora (`partial: true`).
+ */
+export async function getRecentAverages(
+  db: Db,
+  userId: string,
+  month: TransactionFilters["month"],
+  lookback = 3,
+): Promise<MonthlyAverages & { partial: boolean }> {
+  const { start: currentStart } = monthRange(month);
+  const { start: from } = monthRange(shiftMonth(month, -lookback));
+
+  const history = monthlyAverages(await dailyFlowBetween(db, userId, from, currentStart));
+  if (history.months > 0) return { ...history, partial: false };
+
+  const { end } = monthRange(month);
+  const current = monthlyAverages(await dailyFlowBetween(db, userId, currentStart, end));
+  return { ...current, partial: true };
 }

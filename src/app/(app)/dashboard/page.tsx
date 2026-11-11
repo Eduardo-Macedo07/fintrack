@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { weeklyBudget } from "@/features/dashboard/budget";
 import { CategoryBars } from "@/features/dashboard/components/category-bars";
 import { cumulativeByDay } from "@/features/dashboard/cumulative";
 import { MonthHero } from "@/features/dashboard/components/month-hero";
@@ -11,7 +12,7 @@ import {
   getMonthSummary,
   listTransactions,
 } from "@/features/transactions/server/service";
-import { currentMonth, isMonthKey, today } from "@/lib/dates";
+import { currentMonth, daysInMonth, isMonthKey, today } from "@/lib/dates";
 import { prisma } from "@/server/db";
 import { requireUser } from "@/server/session";
 
@@ -32,6 +33,11 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
 
   const todayDay = month === currentMonth() ? Number(today().slice(8, 10)) : null;
 
+  const weekly =
+    todayDay === null
+      ? null
+      : weeklyBudget({ net: summary.net, todayDay, daysInMonth: daysInMonth(month) });
+
   return (
     <div className="grid gap-12">
       <MonthHero
@@ -39,6 +45,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
         income={summary.income}
         expense={summary.expense}
         balance={summary.balance}
+        weekly={weekly}
       />
 
       <section aria-labelledby="categories-title">

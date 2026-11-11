@@ -86,6 +86,15 @@ Direção: simples, bonita e animada, para responder rápido "como está meu mê
 - **Fontes:** Bricolage Grotesque (títulos e valores) e Geist (texto). **Cores:** azul-ultramar da marca; verde e vermelho **escurecidos** para passar contraste AA em texto pequeno.
 - **Armadilha evitada:** controles com `layoutId` (pílula deslizante) tremiam quando o diálogo se recentralizava. A pílula do `Segmented` é posicionada pelo índice da opção, não medida na tela.
 
+## Planejamento (orçamento semanal, simulador e investimentos)
+
+- **Orçamento semanal** (`features/dashboard/budget.ts`): o que sobra do mês (entrou − saiu até agora) dividido pelos dias que faltam, contando hoje. A "semana" nunca passa do que sobra e, sem sobra, tudo é zero. Aparece só no mês atual.
+- **Simulador** (`features/planning/projection.ts`): aporte no fim de cada mês, juros compostos com **taxa mensal equivalente** à anual (não anual ÷ 12). Valores nominais e sem imposto; mostramos também o valor em dinheiro de hoje (desconto de inflação). Testado contra a fórmula fechada de valor futuro.
+- **Sugestão de quanto guardar** usa a média dos últimos 3 meses **completos**, contando só meses com movimento (quem começou há 1 mês não tem a média diluída). Sem histórico completo, usa o mês atual e avisa que é parcial.
+- **Conteúdo de investimentos é educativo** (`features/planning/learn.ts`). Regras: descreve **tipos** de investimento (nunca recomenda produto ou instituição), não promete rentabilidade, não detalha imposto (muda com frequência) e sempre exibe o aviso de que não é recomendação.
+- **Taxas são hipóteses editáveis.** A única referência de mercado (Selic 13,75% ao ano em 04/11/2026; inflação de 5% ao ano) fica em `REFERENCE`, **datada**, com link para o Banco Central. É um dado que envelhece: revisar a cada mudança relevante.
+- **Fora do escopo por enquanto:** salvar metas no banco (virá com "Metas financeiras") e descontar imposto de renda por produto.
+
 ## Limitações conhecidas (a tratar nas próximas etapas)
 
 - **Sem limite de tentativas de login** (rate limiting). Necessário antes de uso real.
