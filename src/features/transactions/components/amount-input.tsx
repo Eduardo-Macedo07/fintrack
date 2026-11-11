@@ -1,6 +1,6 @@
 "use client";
 
-import { MAX_AMOUNT_CENTS } from "../schemas";
+import { nextCents, parsePasted } from "../amount-mask";
 import { cn } from "@/lib/utils";
 
 /**
@@ -41,9 +41,12 @@ export function AmountInput({
           aria-label="Valor em reais"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${name}-error` : undefined}
-          onChange={(e) => {
-            const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
-            onChange(Math.min(Number(digits || 0), MAX_AMOUNT_CENTS));
+          onChange={(e) => onChange(nextCents(cents, e.target.value))}
+          onPaste={(e) => {
+            // Colar vira valor em reais (R$ 12,34), não "dígitos soltos" no meio do campo.
+            e.preventDefault();
+            const pasted = parsePasted(e.clipboardData.getData("text"));
+            if (pasted !== null) onChange(pasted);
           }}
           className={cn(
             "font-display tabular w-full min-w-0 bg-transparent text-center text-5xl font-semibold tracking-tight outline-none",
