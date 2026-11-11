@@ -39,7 +39,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               transition={spring}
               className="pointer-events-auto flex items-center gap-2 rounded-full bg-foreground py-2.5 pr-5 pl-3 text-sm font-medium text-background shadow-lg"
             >
-              <span className="grid size-5 place-items-center rounded-full bg-income text-white">
+              <span className="grid size-5 place-items-center rounded-full bg-income text-income-foreground">
                 <Check className="size-3" strokeWidth={3} />
               </span>
               {toast.message}

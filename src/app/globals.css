@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* `dark:` segue o tema escolhido (atributo data-theme), não só o do sistema */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -23,6 +26,8 @@
   /* Semântica financeira */
   --color-income: var(--income);
   --color-expense: var(--expense);
+  --color-income-foreground: var(--income-foreground);
+  --color-expense-foreground: var(--expense-foreground);
   /* Painel de destaque do mês */
   --color-hero: var(--hero);
   --color-hero-foreground: var(--hero-foreground);
@@ -48,28 +53,30 @@
   /* Verde e vermelho escurecidos para passar contraste AA com texto pequeno */
   --income: #0a7c5e;
   --expense: #c93e1c;
+  --income-foreground: #ffffff;
+  --expense-foreground: #ffffff;
   --hero: #2d3ce0;
   --hero-foreground: #ffffff;
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0e1022;
-    --foreground: #eceefa;
-    --card: #171a33;
-    --card-foreground: #eceefa;
-    --muted: #20244a;
-    --muted-foreground: #9ba1c9;
-    --border: #272b54;
-    --primary: #6674ff;
-    --primary-foreground: #0e1022;
-    --income: #34d3a3;
-    --expense: #ff7d5a;
-    --hero: #2a37c9;
-    --hero-foreground: #ffffff;
-    color-scheme: dark;
-  }
+:root[data-theme="dark"] {
+  --background: #0e1022;
+  --foreground: #eceefa;
+  --card: #171a33;
+  --card-foreground: #eceefa;
+  --muted: #20244a;
+  --muted-foreground: #9ba1c9;
+  --border: #272b54;
+  --primary: #6674ff;
+  --primary-foreground: #0e1022;
+  --income: #34d3a3;
+  --expense: #ff7d5a;
+  --income-foreground: #062b20;
+  --expense-foreground: #2e0d04;
+  --hero: #2a37c9;
+  --hero-foreground: #ffffff;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -96,4 +103,19 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Troca de tema suave: a classe é posta no <html> por ~0,4 s só no momento da troca
+   (não deixa todo hover do app com transição de cor). */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease,
+    border-color 0.35s ease,
+    fill 0.35s ease,
+    stroke 0.35s ease,
+    box-shadow 0.35s ease !important;
 }

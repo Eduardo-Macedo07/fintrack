@@ -169,8 +169,18 @@ function TransactionForm({
         onChange={changeType}
         className="w-full"
         options={[
-          { value: "EXPENSE", label: "Despesa", activeClassName: "bg-foreground" },
-          { value: "INCOME", label: "Receita", activeClassName: "bg-income" },
+          {
+            value: "EXPENSE",
+            label: "Despesa",
+            activeClassName: "bg-foreground",
+            activeTextClassName: "text-background",
+          },
+          {
+            value: "INCOME",
+            label: "Receita",
+            activeClassName: "bg-income",
+            activeTextClassName: "text-income-foreground",
+          },
         ]}
       />
 

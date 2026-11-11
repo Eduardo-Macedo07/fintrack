@@ -47,8 +47,18 @@ export function TransactionFilters({ categories }: { categories: CategoryOption[
         className="w-full sm:w-auto"
         options={[
           { value: "ALL", label: "Tudo" },
-          { value: "EXPENSE", label: "Despesas", activeClassName: "bg-foreground" },
-          { value: "INCOME", label: "Receitas", activeClassName: "bg-income" },
+          {
+            value: "EXPENSE",
+            label: "Despesas",
+            activeClassName: "bg-foreground",
+            activeTextClassName: "text-background",
+          },
+          {
+            value: "INCOME",
+            label: "Receitas",
+            activeClassName: "bg-income",
+            activeTextClassName: "text-income-foreground",
+          },
         ]}
       />
       <div className="grid gap-3 sm:grid-cols-2">
