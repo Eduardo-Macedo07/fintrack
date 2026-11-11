@@ -48,6 +48,10 @@ Abra <http://localhost:3000> e entre com a conta de demonstração (`demo@fintra
 
 Sem Docker? Use seu próprio PostgreSQL, ajuste `DATABASE_URL` no `.env.local` e rode `npm run setup -- --skip-docker`. Para pular a conta de demonstração: `npm run setup -- --no-seed`. A conta de demonstração só é criada em banco local (`npm run db:seed` recusa qualquer outro).
 
+## Publicar na internet
+
+Para abrir o app por um endereço (celular ou computador), siga [`docs/DEPLOY.md`](docs/DEPLOY.md): Neon (banco) + Vercel (hospedagem), com contas gratuitas e cerca de 10 minutos.
+
 ## Scripts
 
 | Comando              | O que faz                                                              |
