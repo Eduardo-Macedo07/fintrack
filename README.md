@@ -38,14 +38,14 @@ Pré-requisitos: Node.js 22+ e Docker.
 ```bash
 git clone https://github.com/Eduardo-Macedo07/fintrack.git
 cd fintrack
-docker compose up -d          # PostgreSQL local (bancos fintrack e fintrack_test)
-npm install                   # também gera o Prisma Client (postinstall)
-cp .env.example .env.local    # preencha AUTH_SECRET (openssl rand -base64 32)
-npm run db:migrate            # cria as tabelas
+npm install
+npm run setup     # cria o .env.local, sobe o PostgreSQL (Docker), cria as tabelas e uma conta de demonstração
 npm run dev
 ```
 
-Abra <http://localhost:3000>.
+Abra <http://localhost:3000> e entre com a conta de demonstração (`demo@fintrack.dev` / `demo12345`, com 4 meses de movimentação) ou crie a sua em **Cadastre-se**.
+
+Sem Docker? Use seu próprio PostgreSQL, ajuste `DATABASE_URL` no `.env.local` e rode `npm run setup -- --skip-docker`. Para pular a conta de demonstração: `npm run setup -- --no-seed`. A conta de demonstração só é criada em banco local (`npm run db:seed` recusa qualquer outro).
 
 ## Scripts
 

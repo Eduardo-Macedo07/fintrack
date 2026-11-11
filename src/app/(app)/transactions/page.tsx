@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { MonthSwitcher } from "@/components/month-switcher";
 import { TransactionFilters } from "@/features/transactions/components/transaction-filters";
 import { TransactionList } from "@/features/transactions/components/transaction-list";
 import { listCategories, listTransactions } from "@/features/transactions/server/service";
 import { transactionFiltersSchema } from "@/features/transactions/schemas";
+import { PageSkeleton } from "@/components/layout/skeletons";
 import { prisma } from "@/server/db";
 import { requireUser } from "@/server/session";
 
 export const metadata: Metadata = { title: "Transações" };
 
-export default async function TransactionsPage({
+async function TransactionsContent({
   searchParams,
-}: PageProps<"/transactions">) {
+}: Pick<PageProps<"/transactions">, "searchParams">) {
   const user = await requireUser();
 
   const raw = await searchParams;
@@ -50,5 +52,14 @@ export default async function TransactionsPage({
         }
       />
     </div>
+  );
+}
+
+/** Página síncrona: o conteúdo que lê sessão/banco fica no <Suspense> desta página (ver dashboard/page.tsx). */
+export default function Page(props: PageProps<"/transactions">) {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <TransactionsContent searchParams={props.searchParams} />
+    </Suspense>
   );
 }
