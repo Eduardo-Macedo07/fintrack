@@ -14,7 +14,7 @@ import { NAV_ITEMS } from "./nav-items";
 export function BottomNav() {
   const pathname = usePathname();
   const { openNew } = useTransactionDialog();
-  const [first, second] = NAV_ITEMS;
+  const [first, second, third] = NAV_ITEMS;
 
   const tab = (item: (typeof NAV_ITEMS)[number]) => {
     const active = pathname.startsWith(item.href);
@@ -40,8 +40,9 @@ export function BottomNav() {
       aria-label="Principal"
       className="fixed inset-x-0 bottom-0 z-30 border-t bg-card/90 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
     >
-      <div className="mx-auto grid max-w-md grid-cols-3 items-end px-4">
+      <div className="mx-auto grid max-w-md grid-cols-4 items-end px-2">
         {tab(first)}
+        {tab(second)}
         <div className="flex justify-center">
           <motion.button
             type="button"
@@ -54,7 +55,7 @@ export function BottomNav() {
             <Plus className="size-7" strokeWidth={2.4} />
           </motion.button>
         </div>
-        {tab(second)}
+        {tab(third)}
       </div>
     </nav>
   );

@@ -57,6 +57,12 @@ export function monthRange(month: MonthKey): { start: Date; end: Date } {
   return { start: new Date(Date.UTC(y, mo - 1, 1)), end: new Date(Date.UTC(y, mo, 1)) };
 }
 
+/** Quantos dias tem o mês (28 a 31). */
+export function daysInMonth(month: MonthKey): number {
+  const { start, end } = monthRange(month);
+  return Math.round((end.getTime() - start.getTime()) / 86_400_000);
+}
+
 export function shiftMonth(month: MonthKey, delta: number): MonthKey {
   const { start } = monthRange(month);
   const d = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + delta, 1));
