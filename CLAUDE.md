@@ -7,6 +7,7 @@ FinTrack is a personal-finance web app (Next.js 16 App Router, React 19, TypeScr
 ## Commands
 
 ```bash
+npm run setup               # one-shot: .env.local + AUTH_SECRET, docker compose up, migrate, demo seed (--skip-docker, --no-seed)
 docker compose up -d        # PostgreSQL 17 (creates both `fintrack` and `fintrack_test`)
 npm run dev                 # dev server
 npm run lint | format:check # CI enforces both
@@ -14,6 +15,7 @@ npm run typecheck           # runs `next typegen` first: PageProps<"/route"> typ
 npm test                    # vitest run (all tests)
 npx vitest run src/lib/money.test.ts            # one file
 npx vitest run -t "nome do teste"               # one test by name
+npm run db:seed             # demo account demo@fintrack.dev / demo12345 (local DB only; refuses remote hosts and NODE_ENV=production)
 npm run db:migrate          # prisma migrate dev (does NOT regenerate the client in Prisma 7)
 npx prisma generate         # client goes to src/generated/ (gitignored; also runs on postinstall)
 ```
@@ -25,7 +27,7 @@ npx prisma generate         # client goes to src/generated/ (gitignored; also ru
 ## Next.js 16 specifics (read `node_modules/next/dist/docs/` before relying on memory, per `AGENTS.md`)
 
 - `middleware.ts` is now **`src/proxy.ts`**. It only does an optimistic redirect using the JWT; it is not the security boundary.
-- `cacheComponents` is on: request-time data (session/cookies, DB, `searchParams`) must sit under `<Suspense>`. `src/app/(app)/layout.tsx` wraps `AppShell` in Suspense and `AppShell` wraps `children` in another one. A new private page needs no extra boundary, but must not read request data outside them.
+- `cacheComponents` is on: request-time data (session/cookies, DB, `searchParams`) must sit under `<Suspense>`. **Every private page must be a synchronous default export that wraps its async content component in its own `<Suspense fallback={<PageSkeleton />}>`** (see `dashboard/page.tsx`) and pass `props.searchParams` down un-awaited. A boundary only in the shared layout (`AppShell`) is not enough: client navigations re-render just below the layout, so it never shows, `next dev` reports a "blocking route" error (production builds do NOT), and navigation is not instant. Always check a new page in `npm run dev`, not only `next build`.
 - After mutating, Server Actions call `revalidatePath("/dashboard")` and `("/transactions")`; add new pages that show affected data to `refresh()` in `features/transactions/server/actions.ts`.
 
 ## Architecture

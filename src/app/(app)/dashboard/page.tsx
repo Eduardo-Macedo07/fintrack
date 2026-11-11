@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 
 import { weeklyBudget } from "@/features/dashboard/budget";
@@ -13,12 +14,15 @@ import {
   listTransactions,
 } from "@/features/transactions/server/service";
 import { currentMonth, daysInMonth, isMonthKey, today } from "@/lib/dates";
+import { PageSkeleton } from "@/components/layout/skeletons";
 import { prisma } from "@/server/db";
 import { requireUser } from "@/server/session";
 
 export const metadata: Metadata = { title: "Início" };
 
-export default async function DashboardPage({ searchParams }: PageProps<"/dashboard">) {
+async function DashboardContent({
+  searchParams,
+}: Pick<PageProps<"/dashboard">, "searchParams">) {
   // Cada página privada confirma a sessão: layouts não bastam como proteção.
   const user = await requireUser();
 
@@ -92,5 +96,18 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
         />
       </section>
     </div>
+  );
+}
+
+/**
+ * A página em si é síncrona: o conteúdo que lê sessão/banco fica num <Suspense> PRÓPRIO.
+ * Um Suspense só no layout não basta: na navegação entre páginas o Next re-renderiza apenas
+ * o que está abaixo do layout, então aquele fallback não apareceria.
+ */
+export default function Page(props: PageProps<"/dashboard">) {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <DashboardContent searchParams={props.searchParams} />
+    </Suspense>
   );
 }
