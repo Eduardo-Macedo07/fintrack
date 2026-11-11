@@ -2,7 +2,7 @@
 
 Plataforma web de **controle financeiro pessoal**: receitas, despesas, cartões de crédito, parcelas e metas de economia. Projeto full-stack em TypeScript, construído do zero com foco em regras de negócio reais (parcelamento, fechamento de fatura, saldo correto) e em qualidade de engenharia (testes, CI, validação de entrada, autorização por usuário).
 
-> **Status:** em desenvolvimento. Etapa 1 (arquitetura) concluída.
+> **Status:** em desenvolvimento. Etapas 1 (arquitetura) e 2 (banco de dados e autenticação) concluídas.
 
 ## Stack
 
@@ -22,7 +22,7 @@ Plataforma web de **controle financeiro pessoal**: receitas, despesas, cartões 
 
 ## Funcionalidades
 
-- [ ] **Autenticação**: cadastro, login e isolamento dos dados por usuário
+- [x] **Autenticação**: cadastro, login e isolamento dos dados por usuário
 - [ ] **Dashboard**: saldo total, receitas, despesas e gráficos
 - [ ] **Transações**: criar, editar, excluir e filtrar movimentações
 - [ ] **Cartões de crédito**: limites, compras parceladas e faturas mensais
@@ -35,11 +35,12 @@ Plataforma web de **controle financeiro pessoal**: receitas, despesas, cartões 
 Pré-requisitos: Node.js 22+ e Docker.
 
 ```bash
-git clone <url-do-repositorio> fintrack
+git clone https://github.com/Eduardo-Macedo07/fintrack.git
 cd fintrack
-npm install
-cp .env.example .env.local   # preencha AUTH_SECRET (openssl rand -base64 32)
-docker compose up -d          # PostgreSQL local
+docker compose up -d          # PostgreSQL local (bancos fintrack e fintrack_test)
+npm install                   # também gera o Prisma Client (postinstall)
+cp .env.example .env.local    # preencha AUTH_SECRET (openssl rand -base64 32)
+npm run db:migrate            # cria as tabelas
 npm run dev
 ```
 
@@ -47,16 +48,18 @@ Abra <http://localhost:3000>.
 
 ## Scripts
 
-| Comando             | O que faz                          |
-| ------------------- | ---------------------------------- |
-| `npm run dev`       | Servidor de desenvolvimento        |
-| `npm run build`     | Build de produção                  |
-| `npm run lint`      | ESLint                             |
-| `npm run typecheck` | Checagem de tipos (`tsc --noEmit`) |
-| `npm run format`    | Formata o código com Prettier      |
-| `npm test`          | Testes unitários (Vitest)          |
+| Comando              | O que faz                                                              |
+| -------------------- | ---------------------------------------------------------------------- |
+| `npm run dev`        | Servidor de desenvolvimento                                            |
+| `npm run build`      | Build de produção                                                      |
+| `npm run lint`       | ESLint                                                                 |
+| `npm run typecheck`  | Checagem de tipos (`tsc --noEmit`)                                     |
+| `npm run format`     | Formata o código com Prettier                                          |
+| `npm test`           | Testes unitários e de integração (Vitest; precisa do PostgreSQL no ar) |
+| `npm run db:migrate` | Cria/aplica migrações no banco de desenvolvimento                      |
+| `npm run db:studio`  | Interface visual do banco (Prisma Studio)                              |
 
-O CI (`.github/workflows/ci.yml`) roda formatação, lint, tipos e testes a cada push e pull request.
+O CI (`.github/workflows/ci.yml`) sobe um PostgreSQL e roda formatação, lint, tipos, testes e build a cada push e pull request.
 
 ## Arquitetura
 
@@ -86,7 +89,7 @@ docs/             # Documentação do projeto
 ## Roadmap
 
 1. ✅ Preparação e arquitetura
-2. ⬜ Banco de dados e autenticação
+2. ✅ Banco de dados e autenticação
 3. ⬜ Dashboard e CRUD de transações
 4. ⬜ Regras financeiras (parcelas, faturas, recorrência)
 5. ⬜ Relatórios e qualidade
