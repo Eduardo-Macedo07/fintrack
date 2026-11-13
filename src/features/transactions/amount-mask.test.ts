@@ -1,13 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { displayDigits, nextCents, parsePasted } from "./amount-mask";
+import { formatAmount, nextCents, parsePasted } from "./amount-mask";
 
-/** O texto que o campo mostra para um valor (igual ao do componente). */
-const show = (cents: number) =>
-  (cents / 100).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+const show = formatAmount;
 
 /** Simula o usuário digitando `char` com o cursor na posição `pos` do texto mostrado. */
 const typeAt = (cents: number, pos: number, char: string) => {
@@ -20,14 +15,6 @@ const deleteAt = (cents: number, pos: number) => {
   const text = show(cents);
   return nextCents(cents, text.slice(0, pos) + text.slice(pos + 1));
 };
-
-describe("displayDigits", () => {
-  it("mostra no mínimo 3 dígitos", () => {
-    expect(displayDigits(0)).toBe("000");
-    expect(displayDigits(5)).toBe("005");
-    expect(displayDigits(3590)).toBe("3590");
-  });
-});
 
 describe("nextCents: digitar", () => {
   it("digitar 3590 dá R$ 35,90", () => {
@@ -66,14 +53,17 @@ describe("nextCents: digitar", () => {
 });
 
 describe("nextCents: apagar", () => {
-  it("backspace em qualquer posição remove o último dígito", () => {
-    for (const start of [359, 3590, 123456]) {
+  it("apagar em QUALQUER posição remove o último dígito, inclusive sobre a vírgula ou o ponto", () => {
+    for (const start of [359, 3590, 123456, 100000000]) {
       const text = show(start);
       for (let pos = 0; pos < text.length; pos++) {
-        if (/\D/.test(text[pos])) continue; // apagar o separador não remove dígito
         expect(deleteAt(start, pos)).toBe(Math.floor(start / 10));
       }
     }
+  });
+
+  it("Backspace logo depois da vírgula (cursor no meio de 35,90) apaga um dígito", () => {
+    expect(nextCents(3590, "3590")).toBe(359); // "35,90" sem a vírgula
   });
 
   it("apagar até o fim volta a zero", () => {
@@ -83,13 +73,27 @@ describe("nextCents: apagar", () => {
   });
 });
 
-describe("nextCents: substituir", () => {
+describe("nextCents: substituir e ignorar", () => {
   it("selecionar tudo e digitar começa um valor novo", () => {
     expect(nextCents(3590, "7")).toBe(7);
   });
 
   it("texto vazio é zero", () => {
     expect(nextCents(3590, "")).toBe(0);
+  });
+
+  it("preencher o campo inteiro de uma vez vale o texto todo (não é confundido com digitar)", () => {
+    expect(nextCents(0, "3590")).toBe(3590);
+    expect(nextCents(0, "1000")).toBe(1000);
+    expect(nextCents(3597, "3590")).toBe(3590);
+    expect(nextCents(6000, "7500")).toBe(7500);
+  });
+
+  it("digitar algo que não é número não muda o valor", () => {
+    for (const ch of ["a", ",", ".", " ", "-"]) {
+      expect(typeAt(3590, 2, ch)).toBe(3590);
+      expect(typeAt(0, 4, ch)).toBe(0);
+    }
   });
 });
 

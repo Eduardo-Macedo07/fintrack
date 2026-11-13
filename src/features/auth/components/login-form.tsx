@@ -7,7 +7,12 @@ import { Button } from "@/components/ui/button";
 import { loginAction } from "../server/actions";
 import { Field } from "./field";
 
-export function LoginForm() {
+/** `defaults` preenche o formulário de início (usado pela versão de demonstração). */
+export function LoginForm({
+  defaults,
+}: {
+  defaults?: { email?: string; password?: string };
+}) {
   const [state, action, pending] = useActionState(loginAction, undefined);
 
   return (
@@ -25,7 +30,7 @@ export function LoginForm() {
         label="E-mail"
         type="email"
         autoComplete="email"
-        defaultValue={state?.values?.email}
+        defaultValue={state?.values?.email ?? defaults?.email}
         errors={state?.fieldErrors?.email}
         required
       />
@@ -34,6 +39,7 @@ export function LoginForm() {
         label="Senha"
         type="password"
         autoComplete="current-password"
+        defaultValue={defaults?.password}
         errors={state?.fieldErrors?.password}
         required
       />

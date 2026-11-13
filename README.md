@@ -48,6 +48,12 @@ Abra <http://localhost:3000> e entre com a conta de demonstração (`demo@fintra
 
 Sem Docker? Use seu próprio PostgreSQL, ajuste `DATABASE_URL` no `.env.local` e rode `npm run setup -- --skip-docker`. Para pular a conta de demonstração: `npm run setup -- --no-seed`. A conta de demonstração só é criada em banco local (`npm run db:seed` recusa qualquer outro).
 
+## Demonstração no navegador
+
+`npm run demo:build` gera `demo/dist/fintrack.html`: o app como **uma página única**, sem servidor. Ela empacota as telas reais (`src/`) com uma camada de dados que roda no navegador (`demo/`), então dá para testar login, transações, planejamento e tema escuro só abrindo um link. Os dados são de exemplo e ficam no `localStorage` do aparelho.
+
+Não substitui o app publicado: sem servidor, não há sincronização entre aparelhos, e a senha da demonstração não passa pelo bcrypt do app real.
+
 ## Publicar na internet
 
 Para abrir o app por um endereço (celular ou computador), siga [`docs/DEPLOY.md`](docs/DEPLOY.md): Neon (banco) + Vercel (hospedagem), com contas gratuitas e cerca de 10 minutos.

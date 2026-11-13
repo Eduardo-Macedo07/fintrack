@@ -99,7 +99,8 @@ export function MonthHero({ month, income, expense, balance, weekly }: Props) {
         />
       </motion.div>
 
-      {weekly && (
+      {/* Sem nenhuma movimentação não há o que dividir: "gastou tudo" seria falso. */}
+      {weekly && !empty && (
         <motion.div variants={item} className="mt-6 rounded-2xl bg-white/12 px-4 py-3.5">
           {weekly.over ? (
             <p className="text-sm">

@@ -4,44 +4,50 @@ import { MAX_AMOUNT_CENTS } from "./schemas";
 
 const onlyDigits = (text: string) => text.replace(/\D/g, "");
 
-/** Os dígitos que o campo MOSTRA para um valor: sempre ao menos 3 ("0,00" → "000"). */
-export const displayDigits = (cents: number) => String(cents).padStart(3, "0");
+/** O texto que o campo mostra: 3590 → "35,90"; 123456 → "1.234,56". */
+export function formatAmount(cents: number): string {
+  return (cents / 100).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
 
 /**
  * Regra do campo de valor "caixa registradora", INDEPENDENTE de onde está o cursor.
  *
  * No celular, tocar no campo põe o cursor no meio de "0,00". Se só extraíssemos os dígitos
  * do texto novo, o primeiro número entraria no meio e o valor sairia errado
- * (digitar 3590 virava 3.005,90). Por isso comparamos com os dígitos que estavam na tela:
+ * (digitar 3590 virava 3.005,90). Por isso comparamos o texto novo com o que estava na tela:
  *
- *  - entrou 1 dígito, em qualquer posição → ele vai para o FIM do valor (35,90 + 7 → 359,07)
- *  - saiu 1 dígito, em qualquer posição   → remove o último (359,07 → 35,90)
- *  - qualquer outra mudança (selecionar tudo e digitar, preenchimento automático) → usa o texto todo
+ *  - é o texto da tela com 1 caractere A MAIS → foi digitado: se for dígito, vai para o FIM
+ *    do valor (35,90 + 7 → 359,07), em qualquer posição do cursor; se não for, é ignorado
+ *  - é o texto da tela com 1 caractere A MENOS → foi apagado: remove o último dígito, mesmo
+ *    que o caractere apagado seja a vírgula ou o ponto (cursor no meio do número)
+ *  - qualquer outra coisa (selecionar tudo e digitar, preenchimento automático) → vale o texto todo
  *
- * Colar NÃO passa por aqui (ver `parsePasted`): por tamanho, colar "12,34" num campo zerado é
- * indistinguível de digitar um número.
+ * Colar NÃO passa por aqui (ver `parsePasted`).
  */
 export function nextCents(previousCents: number, newText: string): number {
-  const before = displayDigits(previousCents);
-  const after = onlyDigits(newText);
+  const shown = formatAmount(previousCents);
+  const typed = insertedChar(shown, newText);
 
   let value: number;
-  if (after.length === before.length + 1) {
-    value = previousCents * 10 + Number(insertedDigit(before, after));
-  } else if (after.length === before.length - 1) {
+  if (typed !== null) {
+    value = /\d/.test(typed) ? previousCents * 10 + Number(typed) : previousCents;
+  } else if (insertedChar(newText, shown) !== null) {
     value = Math.floor(previousCents / 10);
   } else {
-    value = Number(after || 0);
+    value = Number(onlyDigits(newText) || 0);
   }
   return Math.min(value, MAX_AMOUNT_CENTS);
 }
 
-/** Qual dígito foi digitado: o do primeiro ponto em que os textos divergem (ou o último). */
-function insertedDigit(before: string, after: string): string {
-  for (let i = 0; i < before.length; i++) {
-    if (before[i] !== after[i]) return after[i];
-  }
-  return after[after.length - 1];
+/** Se `longer` é exatamente `shorter` com um caractere inserido, devolve esse caractere. */
+function insertedChar(shorter: string, longer: string): string | null {
+  if (longer.length !== shorter.length + 1) return null;
+  let i = 0;
+  while (i < shorter.length && shorter[i] === longer[i]) i++;
+  return shorter === longer.slice(0, i) + longer.slice(i + 1) ? longer[i] : null;
 }
 
 /**
