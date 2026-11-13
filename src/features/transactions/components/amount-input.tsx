@@ -1,6 +1,6 @@
 "use client";
 
-import { nextCents, parsePasted } from "../amount-mask";
+import { formatAmount, nextCents, parsePasted } from "../amount-mask";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,10 +21,7 @@ export function AmountInput({
   tone: "income" | "expense";
   error?: string;
 }) {
-  const display = (cents / 100).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const display = formatAmount(cents);
 
   return (
     <div className="grid gap-1.5">
@@ -42,6 +39,16 @@ export function AmountInput({
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${name}-error` : undefined}
           onChange={(e) => onChange(nextCents(cents, e.target.value))}
+          onSelect={(e) => {
+            // Cursor simples vai sempre para o fim, como numa caixa registradora: tocar no meio do
+            // número não muda onde o próximo dígito entra nem o que o Backspace apaga.
+            // Seleções (duplo clique, "selecionar tudo") ficam como estão, para digitar por cima.
+            const el = e.currentTarget;
+            const end = el.value.length;
+            if (el.selectionStart === el.selectionEnd && el.selectionStart !== end) {
+              el.setSelectionRange(end, end);
+            }
+          }}
           onPaste={(e) => {
             // Colar vira valor em reais (R$ 12,34), não "dígitos soltos" no meio do campo.
             e.preventDefault();

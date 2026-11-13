@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useRef, useTransition } from "react";
 
 import { Segmented } from "@/components/segmented";
+import { currentSearch } from "@/lib/current-search";
 
 import type { CategoryOption } from "./transaction-dialog";
 
@@ -26,7 +27,7 @@ export function TransactionFilters({ categories }: { categories: CategoryOption[
   function update(patch: Record<string, string | undefined>) {
     // Lê a URL de AGORA (não a capturada na renderização): a busca é atrasada em 300 ms
     // e, nesse intervalo, o usuário pode ter trocado outro filtro.
-    const next = new URLSearchParams(window.location.search);
+    const next = new URLSearchParams(currentSearch());
     for (const [key, value] of Object.entries(patch)) {
       if (value) next.set(key, value);
       else next.delete(key);

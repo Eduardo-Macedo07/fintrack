@@ -8,6 +8,7 @@ const eslintConfig = defineConfig([
   ...nextTs,
   prettier, // desliga regras de estilo que conflitam com o Prettier
   globalIgnores([
+    "demo/dist/**",
     "src/generated/**",
     ".next/**",
     "out/**",
